@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "nama": "SIJA",
+    "slug": "sija",
+    "deskripsi": "Barang dan alat jurusan SIJA",
+    "link": "/smartschool/barang-jurusan/sija",
+    "image": "/img/kategori-jurusan.jpg"
+  },
+  {
+    "id": 2,
+    "nama": "DKV",
+    "slug": "dkv",
+    "deskripsi": "Barang dan alat jurusan DKV",
+    "link": "/smartschool/barang-jurusan/dkv",
+    "image": "/img/kategori-jurusan.jpg"
+  },
+    {
+    "id": 3,
+    "nama": "TKR",
+    "slug": "tkr",
+    "deskripsi": "Barang dan alat jurusan TKR",
+    "link": "/smartschool/barang-jurusan/tkr",
+    "image": "/img/kategori-jurusan.jpg"
+  }
+]

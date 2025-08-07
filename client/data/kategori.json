@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "nama": "Umum",
+    "slug": "barang-umum",
+    "deskripsi": "Barang dan alat umum",
+    "link": "/smartschool/barang-umum",
+    "image": "/img/kategori-jurusan.jpg"
+  },
+  {
+    "id": 2,
+    "nama": "Jurusan",
+    "slug": "barang-jurusan",
+    "deskripsi": "Barang dan alat jurusan",
+    "link": "/smartschool/barang-jurusan",
+    "image": "/img/kategori-jurusan.jpg"
+  }
+]

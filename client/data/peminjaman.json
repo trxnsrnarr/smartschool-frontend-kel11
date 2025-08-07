@@ -1,0 +1,36 @@
+
+[
+  {
+    "id": 1,
+    "kode_barang": "10224",
+    "nama": "Routeboard",
+    "merk": "TP-Link",
+    "deskripsi": "Routerboard untuk jaringan",
+    "jenis_barang": "sija",
+    "tanggalPeminjaman": "10-Juli-2025",
+    "tanggalPengembalian": "7-Juli-2025",
+    "tanggal_beli": "2023-06-01",
+    "harga_barang": 300000,
+    "status": "Sudah Dikembalikan",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "-",
+    "foto_peminjaman": "/img/bg-cari-data-pelanggar.png",
+    "foto_pengembalian": "/img/background-default.jpeg"
+  },
+  {
+    "id": 2,
+    "kode_barang": "1123",
+    "nama": "Proyektor",
+    "merk": "Epson",
+    "deskripsi": "Proyektor untuk presentasi",
+    "jenis_barang": "",
+    "tanggalPeminjaman": "10-Juli-2025",
+    "tanggalPengembalian": "-",
+    "tanggal_beli": "2023-07-01",
+    "harga_barang": 1500000,
+    "status": "Belum Dikembalikan",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Telat mengembalikan bayar Rp.3000",
+    "foto_peminjaman": "/img/bg-cari-data-pelanggar.png"
+  }
+]

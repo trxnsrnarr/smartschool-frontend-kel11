@@ -1,0 +1,253 @@
+[
+  {
+    "nama": "Certificate",
+    "kode_barang": "1092816",
+    "merk": "AI Opportunity",
+    "tanggal_beli": "2025-07-07",
+    "asal": "SMK Negeri 1 Cibinong",
+    "harga_barang": 100000,
+    "deskripsi": "oke",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "kepemilikan": "milik",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751871718167-Sertifikat-Engineer-12.png?alt=media&token=7dca2799-ff2d-419f-ad16-ac720ff81155"
+    ],
+    "nama_pemilik": "",
+    "id": 1751871749224
+  },
+  {
+    "id": 13192,
+    "kode_barang": "12345678",
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751522525866-cover-1984.jpg?alt=media&token=44dc08fc-8bf4-4c09-8daf-7bd3aee7151a"
+    ],
+    "nama": "Router",
+    "merk": "Mikrotik",
+    "kategori_barang": "Umum",
+    "spesifikasi": "tidak ada gila",
+    "tanggal_beli": "2025-07-02",
+    "deskripsi": "mulus, bagus, oke",
+    "harga_barang": 500000,
+    "status": "Ada",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "menyapu sekolah dalam 1 minggu",
+    "kepemilikan": "milik",
+    "nama_pemilik": null,
+    "m_lokasi_id": 410,
+    "m_sekolah_id": 12380,
+    "created_at": "2025-07-03 13:04:14",
+    "updated_at": "2025-07-03 13:04:14"
+  },
+  {
+    "id": 13193,
+    "kode_barang": "12345678",
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751522525866-cover-1984.jpg?alt=media&token=44dc08fc-8bf4-4c09-8daf-7bd3aee7151a"
+    ],
+    "nama": "Switch",
+    "merk": "Mikrotik",
+    "kategori_barang": "Umum",
+    "spesifikasi": "tidak ada gila",
+    "tanggal_beli": "2025-07-02",
+    "deskripsi": "putih, persegi panjang",
+    "harga_barang": 200000,
+    "status": "Ada",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "menyapu sekolah dalam 1 minggu",
+    "kepemilikan": "milik",
+    "nama_pemilik": null,
+    "m_lokasi_id": 410,
+    "m_sekolah_id": 12380,
+    "created_at": "2025-07-03 13:04:14",
+    "updated_at": "2025-07-03 13:04:14"
+  },
+  {
+    "nama": "Certificate",
+    "kode_barang": "1092817",
+    "merk": "AI Opportunity",
+    "tanggal_beli": "2025-07-06",
+    "asal": "SMKN1CBN",
+    "harga_barang": 100000,
+    "deskripsi": "wahhh",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 5 Bulan",
+    "kepemilikan": "milik",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751873291711-Gemini_Generated_Image_t7fy2at7fy2at7fy.png?alt=media&token=aa50c42a-4c4b-4862-874e-c1322bf70f15"
+    ],
+    "nama_pemilik": "",
+    "id": 1751873301774
+  },
+  {
+    "nama": "PHP",
+    "kode_barang": "1092819",
+    "merk": "AI Opportunity",
+    "tanggal_beli": "2025-07-02",
+    "asal": "SMKN 1 CIBINONG",
+    "harga_barang": 100000,
+    "deskripsi": "gila",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 5 Bulan",
+    "kepemilikan": "milik",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751873634035-Python-logo-notext.svg.png?alt=media&token=6f5e4d4c-2e5c-4e95-b7bf-49bbc26e2057"
+    ],
+    "nama_pemilik": "",
+    "m_sekolah_id": 12380,
+    "id": 1751873675642
+  },
+  {
+    "nama": "nisrina",
+    "kode_barang": "1092821",
+    "merk": "gatau",
+    "tanggal_beli": "2025-07-08",
+    "harga_barang": 100000,
+    "deskripsi": "wah gila",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751927417540-Gemini_Generated_Image_t7fy2at7fy2at7fy.png?alt=media&token=c4988066-b25c-4f17-b4fe-fbdb83d1cd25"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1751927494352
+  },
+  {
+    "nama": "shdgfvb",
+    "kode_barang": "1092825",
+    "merk": "gatau",
+    "tanggal_beli": "2025-07-08",
+    "harga_barang": 100000,
+    "deskripsi": "ok",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 411,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751931981832-failraptor.png?alt=media&token=fcd67511-4cd3-4e5b-bada-57264b6c58ed"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1751932243209
+  },
+  {
+    "nama": "uu aa ii",
+    "kode_barang": "1092828",
+    "merk": "gatau",
+    "tanggal_beli": "2025-07-08",
+    "harga_barang": 100000,
+    "deskripsi": "idk",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751980269209-noraptor.png?alt=media&token=d13ec296-2f27-4611-9f7f-187b42ecd4bc"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1751980301527
+  },
+  {
+    "nama": "uu aa ii",
+    "kode_barang": "1092829",
+    "merk": "gatau",
+    "tanggal_beli": "2025-07-08",
+    "harga_barang": 100000,
+    "deskripsi": "idk",
+    "status": "Ada",
+    "kategori_barang": "sija",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751980269209-noraptor.png?alt=media&token=d13ec296-2f27-4611-9f7f-187b42ecd4bc"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1751980301527
+  },
+  {
+    "nama": "shdgfvb",
+    "kode_barang": "1092825",
+    "merk": "gatau",
+    "tanggal_beli": "2025-07-08",
+    "harga_barang": 100000,
+    "deskripsi": "ok",
+    "status": "Ada",
+    "kategori_barang": "dkv",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 411,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1751931981832-failraptor.png?alt=media&token=fcd67511-4cd3-4e5b-bada-57264b6c58ed"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1751932243209
+  },
+  {
+    "nama": "bencong",
+    "kode_barang": "1092818",
+    "merk": "AI Opportunity",
+    "tanggal_beli": "2025-07-09",
+    "harga_barang": 100000,
+    "deskripsi": "oke",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 5 Bulan",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1752071338771-logo.png?alt=media&token=d4961430-6231-42d0-89d4-49132ef34da0"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1752071411543
+  },
+  {
+    "nama": "uuuuuuuuuuuu",
+    "kode_barang": "1092830",
+    "merk": "gatau",
+    "tanggal_beli": "2025-07-07",
+    "harga_barang": 100000,
+    "deskripsi": "oke",
+    "status": "Ada",
+    "kategori_barang": "",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1752219652163-logo-white.png?alt=media&token=04442975-73ef-4ba2-b8ed-369c7ffcfe40"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1752219690684
+  },
+  {
+    "nama": "gatau",
+    "kode_barang": "10928131",
+    "merk": "AI Opportunity",
+    "tanggal_beli": "2025-07-11",
+    "harga_barang": 100000,
+    "deskripsi": "oke",
+    "status": "Ada",
+    "kategori_barang": "SIJA",
+    "waktu_peminjaman": "3 Hari",
+    "sanksi": "Ngepel Ruang Guru Selama 1 Bulan",
+    "m_lokasi_id": 410,
+    "foto": [
+      "https://firebasestorage.googleapis.com/v0/b/smart-school-300211.appspot.com/o/1752227684794-notfound.png?alt=media&token=006917a7-1ed7-420a-9850-3b4b2b81d3f9"
+    ],
+    "m_sekolah_id": 12380,
+    "id": 1752227735237
+  }
+]
