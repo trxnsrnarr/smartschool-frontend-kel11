@@ -13,7 +13,7 @@ const BarangJurusan = () => {
   const router = useRouter();
   const { slug } = router.query;
 
-  const [peminjaman, setPeminjaman] = useState([]);
+  const [dataPeminjaman, setDataPeminjaman] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedNama, setSelectedNama] = useState("Semua");
   const [filteredData, setFilteredData] = useState([]);
@@ -32,10 +32,40 @@ const BarangJurusan = () => {
         });
 
         if (res.data && Array.isArray(res.data.data)) {
-          setPeminjaman(res.data.data);
-          const uniqueNames = [...new Set(res.data.data.map((item) => item.nama_barang))];
+          const now = new Date();
+
+          const mappedData = res.data.data.map((item, index) => {
+            let statusText = "Belum Dikembalikan";
+            if (item.status === "dikembalikan") {
+              statusText = "Sudah Dikembalikan";
+            } else if (
+              item.status === "telat" &&
+              item.batas_pengembalian &&
+              new Date(item.batas_pengembalian) < now
+            ) {
+              statusText = "Telat Dikembalikan !";
+            }
+
+            return {
+              id: item.id,
+              no: index + 1,
+              tanggalPeminjaman: item.tanggal_peminjaman
+                ? moment(item.tanggal_peminjaman).format("DD MMMM YYYY, HH:mm")
+                : "-",
+              tanggalPengembalian: item.tanggal_pengembalian
+                ? moment(item.tanggal_pengembalian).format("DD MMMM YYYY, HH:mm")
+                : "-",
+              kodeBarang: item.kode_barang,
+              namaBarang: item.nama_barang,
+              peminjam: item.nama_peminjam || "-",
+              status: statusText,
+            };
+          });
+
+          setDataPeminjaman(mappedData);
+          const uniqueNames = [...new Set(mappedData.map((item) => item.namaBarang))];
           setNamaOptions(["Semua", ...uniqueNames]);
-          filterData(res.data.data, search, selectedNama);
+          filterData(mappedData, search, selectedNama);
           setJurusanInfo({ nama: res.data.jurusan });
         } else {
           toast.error("Format data tidak valid");
@@ -52,30 +82,38 @@ const BarangJurusan = () => {
   }, [slug]);
 
   useEffect(() => {
-    filterData(peminjaman, search, selectedNama);
-  }, [search, selectedNama, peminjaman]);
+    filterData(dataPeminjaman, search, selectedNama);
+  }, [search, selectedNama, dataPeminjaman]);
 
   const filterData = (data, keyword, nama) => {
     const hasil = data.filter((item) => {
       const cocokSearch =
-        item.nama_barang?.toLowerCase().includes(keyword.toLowerCase()) ||
-        item.kode_barang?.toLowerCase().includes(keyword.toLowerCase());
-      const cocokNama = nama === "Semua" || item.nama_barang === nama;
+        item.namaBarang?.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.kodeBarang?.toLowerCase().includes(keyword.toLowerCase());
+      const cocokNama = nama === "Semua" || item.namaBarang === nama;
       return cocokSearch && cocokNama;
     });
     setFilteredData(hasil);
   };
 
-  const handleLihatDetail = (id) => {
-    router.push(`/smartschool/peminjaman/barang-jurusan/${slug}/${id}`);
+  const getStatusBadge = (status) => {
+    if (status === "Sudah Dikembalikan") {
+      return (
+        <span className="badge rounded-pill px-3 py-2 fw-semibold" style={{ backgroundColor: "#4EB701", color: "white" }}>
+          {status}
+        </span>
+      );
+    } else {
+      return (
+        <span className="badge rounded-pill px-3 py-2 fw-semibold" style={{ backgroundColor: "#C2140B", color: "white" }}>
+          {status}
+        </span>
+      );
+    }
   };
 
-  const isTelat = (item) => {
-    if (item.status === "dipinjam" && item.batas_pengembalian) {
-      const batas = moment(item.batas_pengembalian);
-      return moment().isAfter(batas);
-    }
-    return false;
+  const handleLihatDetail = (id) => {
+    router.push(`/smartschool/peminjaman/barang-jurusan/${slug}/${id}`);
   };
 
   if (loading) {
@@ -176,51 +214,20 @@ const BarangJurusan = () => {
                         <th>Nama Barang</th>
                         <th>Peminjam</th>
                         <th>Status</th>
-                        <th style={{ width: "140px" }}>Aksi</th>
+                        <th>Aksi</th>
                       </tr>
                     </thead>
                     <tbody>
                       {filteredData.length > 0 ? (
-                        filteredData.map((item, index) => (
+                        filteredData.map((item) => (
                           <tr key={item.id}>
-                            <td>{index + 1}</td>
-                            <td>
-                              {item.tanggal_peminjaman
-                                ? moment(item.tanggal_peminjaman).format("DD MMMM YYYY, HH:mm")
-                                : "-"}
-                            </td>
-                            <td>
-                              {item.tanggal_pengembalian
-                                ? moment(item.tanggal_pengembalian).format("DD MMMM YYYY, HH:mm")
-                                : "-"}
-                            </td>
-                            <td>{item.kode_barang}</td>
-                            <td>{item.nama_barang}</td>
-                            <td>{item.nama_peminjam || "-"}</td>
-                            <td>
-                              <span
-                                className="badge rounded-pill px-3 py-2 fw-semibold me-2"
-                                style={{
-                                  backgroundColor: item.status === "dipinjam" ? "#C2140B" : "#4EB701",
-                                  color: "white",
-                                  fontSize: "0.875rem",
-                                }}
-                              >
-                                {item.status === "dipinjam" ? "Belum Dikembalikan" : "Sudah Dikembalikan"}
-                              </span>
-                              {isTelat(item) && (
-                                <span
-                                  className="badge rounded-pill px-3 py-2 fw-semibold"
-                                  style={{
-                                    backgroundColor: "#FFC107",
-                                    color: "#3A3A3A",
-                                    fontSize: "0.75rem",
-                                  }}
-                                >
-                                  Telat Dikembalikan
-                                </span>
-                              )}
-                            </td>
+                            <td>{item.no}</td>
+                            <td>{item.tanggalPeminjaman}</td>
+                            <td>{item.tanggalPengembalian}</td>
+                            <td>{item.kodeBarang}</td>
+                            <td>{item.namaBarang}</td>
+                            <td>{item.peminjam}</td>
+                            <td>{getStatusBadge(item.status)}</td>
                             <td>
                               <button
                                 className="btn btn-sm rounded-pill"
@@ -242,7 +249,7 @@ const BarangJurusan = () => {
                         ))
                       ) : (
                         <tr>
-                          <td colSpan="8" className="text-center py-4 text-muted">
+                          <td colSpan="8" className="text-muted text-center py-4">
                             {search || selectedNama !== "Semua"
                               ? "Tidak ada data yang sesuai dengan filter"
                               : "Tidak ada data peminjaman"}

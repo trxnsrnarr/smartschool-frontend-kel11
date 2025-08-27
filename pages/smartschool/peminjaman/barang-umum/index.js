@@ -11,7 +11,10 @@ import moment from "moment";
 const BarangUmum = () => {
   const router = useRouter();
   const [dataPeminjaman, setDataPeminjaman] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [search, setSearch] = useState("");
+  const [selectedNama, setSelectedNama] = useState("Semua");
+  const [namaOptions, setNamaOptions] = useState([]);
 
   useEffect(() => {
     const fetchPeminjaman = async () => {
@@ -56,6 +59,10 @@ const BarangUmum = () => {
         });
 
         setDataPeminjaman(mappedData);
+
+        const uniqueNames = [...new Set(mappedData.map((item) => item.namaBarang))];
+        setNamaOptions(["Semua", ...uniqueNames]);
+        filterData(mappedData, search, "Semua");
       } catch (err) {
         console.error("Gagal ambil data peminjaman:", err);
       }
@@ -63,6 +70,21 @@ const BarangUmum = () => {
 
     fetchPeminjaman();
   }, []);
+
+  useEffect(() => {
+    filterData(dataPeminjaman, search, selectedNama);
+  }, [search, selectedNama, dataPeminjaman]);
+
+  const filterData = (data, keyword, nama) => {
+    const hasil = data.filter((item) => {
+      const cocokSearch =
+        item.namaBarang?.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.kodeBarang?.toLowerCase().includes(keyword.toLowerCase());
+      const cocokNama = nama === "Semua" || item.namaBarang === nama;
+      return cocokSearch && cocokNama;
+    });
+    setFilteredData(hasil);
+  };
 
   const getStatusBadge = (status) => {
     if (status === "Sudah Dikembalikan") {
@@ -79,14 +101,6 @@ const BarangUmum = () => {
       );
     }
   };
-
-  const filteredData = dataPeminjaman.filter((item) => {
-    const keyword = search.toLowerCase();
-    return (
-      item.namaBarang.toLowerCase().includes(keyword) ||
-      item.kodeBarang.toLowerCase().includes(keyword)
-    );
-  });
 
   const handleLihatDetail = (id) => {
     router.push(`/smartschool/peminjaman/barang-umum/${id}`);
@@ -116,26 +130,40 @@ const BarangUmum = () => {
                 <span className="fw-bold text-primary"> {kategori.nama}</span>
               </div>
 
-              {/* Search */}
+              {/* Filter */}
               <div className="card-ss mb-4 mt-4 px-4 py-4" style={{ backgroundColor: "white", borderRadius: "26px" }}>
-                <div className="d-flex gap-2">
-                  <input
-                    type="text"
-                    className="form-control rounded-pill pe-5"
-                    placeholder="Cari Barang (Nama / Kode)"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                  />
-                  <FaSearch
-                    style={{
-                      position: "absolute",
-                      right: "32px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "#999",
-                      pointerEvents: "none",
-                    }}
-                  />
+                <div className="d-flex mt-1 gap-2 flex-wrap">
+                  <div className="flex-grow-1 position-relative">
+                    <input
+                      type="text"
+                      className="form-control rounded-pill pe-5"
+                      placeholder="Cari Barang (Nama / Kode)"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                    />
+                    <FaSearch
+                      style={{
+                        position: "absolute",
+                        right: "16px",
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#999",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  </div>
+                  <select
+                    className="form-select rounded-pill"
+                    style={{ maxWidth: "200px" }}
+                    value={selectedNama}
+                    onChange={(e) => setSelectedNama(e.target.value)}
+                  >
+                    {namaOptions.map((nama, i) => (
+                      <option key={i} value={nama}>
+                        {nama}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
@@ -188,7 +216,9 @@ const BarangUmum = () => {
                       ) : (
                         <tr>
                           <td colSpan="8" className="text-muted text-center py-4">
-                            Tidak ada data peminjaman ditemukan.
+                            {search || selectedNama !== "Semua"
+                              ? "Tidak ada data yang sesuai dengan filter"
+                              : "Tidak ada data peminjaman"}
                           </td>
                         </tr>
                       )}
