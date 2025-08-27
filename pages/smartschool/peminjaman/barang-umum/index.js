@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { axiosInstance as clientAxios } from "../../../../client/clientAxios";
 import { useRouter } from "next/router";
+import moment from "moment";
 
 const BarangUmum = () => {
   const router = useRouter();
@@ -172,8 +173,16 @@ useEffect(() => {
                       {filteredData.map((item, index) => (
                         <tr key={item.id}>
                           <td>{index + 1}</td>
-                          <td>{item.tanggal_peminjaman || "-"}</td>
-                          <td>{item.tanggal_pengembalian || "-"}</td>
+                          <td>
+                            {item.tanggal_peminjaman
+                              ? moment(item.tanggal_peminjaman).format("DD MMMM YYYY, HH:mm")
+                              : "-"}
+                          </td>
+                          <td>
+                            {item.tanggal_pengembalian
+                              ? moment(item.tanggal_pengembalian).format("DD MMMM YYYY, HH:mm")
+                              : "-"}
+                          </td>
                           <td>{item.kode_barang}</td>
                           <td>{item.nama_barang}</td>
                           <td>{item.nama_peminjam || "-"}</td>

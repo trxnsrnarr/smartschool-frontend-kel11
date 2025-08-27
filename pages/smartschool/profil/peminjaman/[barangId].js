@@ -5,6 +5,9 @@ import AnimatePage from "components/Shared/AnimatePage/AnimatePage";
 import { useRouter } from "next/router";
 import ModalPengembalian from "components/Profil/ModalPengembalian";
 import { useEffect, useState } from "react";
+import moment from "moment";
+import "moment/locale/id";
+moment.locale("id");
 
 const PeminjamanDetailPage = () => {
   const router = useRouter();
@@ -98,8 +101,18 @@ const PeminjamanDetailPage = () => {
                   <tbody>
                     {[
 
-                      ["Tanggal Peminjaman", barang.tanggal_peminjaman || "-"],
-                      ["Tanggal Pengembalian", barang.tanggal_pengembalian || "-"],
+                      [
+                        "Tanggal Peminjaman",
+                        barang.tanggal_peminjaman
+                          ? moment(barang.tanggal_peminjaman).format("DD MMMM YYYY HH:mm")
+                          : "-",
+                      ],
+                      [
+                        "Tanggal Pengembalian",
+                        barang.tanggal_pengembalian
+                          ? moment(barang.tanggal_pengembalian).format("DD MMMM YYYY HH:mm")
+                          : "-",
+                      ],
                       // ["Waktu Peminjaman", barang.waktu_peminjaman || barang?.waktu || "-"],
                       ["Kode Barang", barang.kode_barang || "-"],
                       ["Nama Barang", barang.nama_barang || "-"],

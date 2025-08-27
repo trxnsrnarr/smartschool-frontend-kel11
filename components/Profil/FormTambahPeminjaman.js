@@ -171,6 +171,7 @@ const FormTambahPeminjaman = ({ onCancel }) => {
         merk,
         spesifikasi,
         tanggal_peminjaman: tanggalPinjam,
+        waktu_peminjaman: durasiJam, // <- tambahkan ini
         sanksi,
         foto_peminjaman: fotoPinjamUrl,
         foto_pengembalian: fotoKembaliUrl,
@@ -209,17 +210,7 @@ const FormTambahPeminjaman = ({ onCancel }) => {
           onChange={(e, uploadedFile) => setFotoPinjamUrl(uploadedFile)}
         />
 
-        <UploadPhoto
-          name="fotoKembali"
-          id="uploadFotoKembali"
-          label="Foto Pengembalian"
-          col="col-md-6"
-          titleUnggahan="Foto"
-          titleRasio="1:1"
-          isSarpras
-          listPhoto={fotoKembaliUrl ? [fotoKembaliUrl] : []}
-          onChange={() => {}}
-          disabled={true}
+        <table
         />
 
         <div>

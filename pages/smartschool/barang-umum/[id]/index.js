@@ -116,7 +116,6 @@ const DetailBarangPage = () => {
                     <tr><td>Spesifikasi</td><td>:</td><td className="fw-bold">{currentBarang.spesifikasi}</td></tr>
                     <tr><td>Tanggal Dibeli</td><td>:</td><td className="fw-bold">{moment(currentBarang.tanggal_dibeli).format("DD MMMM YYYY")}</td></tr>
                     <tr><td>Deskripsi</td><td>:</td><td className="fw-bold">{currentBarang.deskripsi}</td></tr>
-                    <tr><td>Kategori Barang</td><td>:</td><td className="fw-bold">{currentBarang.kategori_barang}</td></tr>
                     <tr><td>ID Kategori</td><td>:</td><td className="fw-bold">{currentBarang.m_kategori_barang_id}</td></tr>
                     <tr><td>Harga</td><td>:</td><td className="fw-bold">Rp. {formatAngkaUang(currentBarang.harga)}</td></tr>
                     <tr><td>Status</td><td>:</td><td className="fw-bold">{currentBarang.status}</td></tr>
@@ -163,8 +162,8 @@ const DetailBarangPage = () => {
           show={!!editData}
           editData={editData}
           setEditData={setEditData}
-          _getBarang={_getDetailBarang}
           onCloseModal={() => setEditData(null)}
+          _getBarang={() => window.location.reload()} // Refresh halaman
         />
       </AnimatePage>
     </Layout>

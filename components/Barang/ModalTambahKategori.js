@@ -10,11 +10,12 @@ const initialForm = {
   nama: "",
   slug: "",
   deskripsi: "",
-  link: "/smartschool/barang-jurusan/",
+  jenis_kolom: "",
+  link: "",
   image: "/img/kategori-jurusan.jpg",
 };
 
-const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }) => {
+const ModalTambahKategori = ({ onCloseModal, refreshData, editData, setEditData }) => {
   const [formData, setFormData] = useState(initialForm);
   const [buttonState, setButtonState] = useState("idle");
 
@@ -24,7 +25,8 @@ const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }
         nama: editData.nama || "",
         slug: editData.slug || "",
         deskripsi: editData.deskripsi || "",
-        link: `/smartschool/barang-jurusan/${editData.slug || ""}`,
+        jenis_kolom: editData.jenis_kolom || "",
+        link: editData.link || "",
         image: editData.image || "/img/kategori-jurusan.jpg",
       });
     } else {
@@ -32,28 +34,31 @@ const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }
     }
   }, [editData]);
 
-  // Update link otomatis ketika slug berubah
-  useEffect(() => {
-    setFormData((prev) => ({
-      ...prev,
-      link: `/smartschool/barang-jurusan/${prev.slug}`,
-    }));
-  }, [formData.slug]);
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    // otomatis lowercase slug
-    const formattedValue = name === "slug" ? value.toLowerCase().replace(/\s+/g, "-") : value;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: formattedValue,
-    }));
+    
+    if (name === "jenis_kolom") {
+      // Otomatis set slug berdasarkan jenis kolom
+      const slugMap = {
+        "barang-umum": "barang-umum",
+        "barang-jurusan": "barang-jurusan"
+      };
+      
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+        slug: slugMap[value] || ""
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async () => {
-    if (!formData.nama || !formData.slug || !formData.deskripsi) {
+    if (!formData.nama || !formData.slug || !formData.deskripsi || !formData.jenis_kolom || !formData.link) {
       toast.error("Semua field harus diisi");
       return;
     }
@@ -77,18 +82,21 @@ const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }
         nama: formData.nama,
         slug: formData.slug,
         deskripsi: formData.deskripsi,
+        jenis_kolom: formData.jenis_kolom,
         link: formData.link,
         image: "/img/kategori-jurusan.jpg",
         m_sekolah_id,
       };
 
+      console.log("Payload yang dikirim:", payload);
+
       if (editData) {
-        await clientAxios.put(`/jurusan-barang/${editData.id}`, payload, {
+        await clientAxios.put(`/kategori-barang/${editData.id}`, payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Kategori berhasil diperbarui");
       } else {
-        await clientAxios.post("/jurusan-barang", payload, {
+        await clientAxios.post("/kategori-barang", payload, {
           headers: { Authorization: `Bearer ${token}` },
         });
         toast.success("Kategori berhasil ditambahkan");
@@ -96,56 +104,96 @@ const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }
 
       setButtonState("success");
       setFormData(initialForm);
-      setEditData(null);
-      hideModal("ModalTambahJurusan");
+      setEditData && setEditData(null);
+      hideModal("ModalTambahKategori");
+      
+      if (refreshData) {
+        refreshData();
+      }
+      
       onCloseModal?.();
-      refreshData?.();
+      
     } catch (err) {
-      console.error("Error simpan jurusan:", err);
-      toast.error("Gagal menyimpan data.");
+      console.error("Error simpan kategori:", err.response?.data || err);
+      toast.error(err.response?.data?.message || "Gagal menyimpan data.");
       setButtonState("error");
     }
   };
 
+  const handleClose = () => {
+    setEditData && setEditData(null);
+    onCloseModal?.();
+  };
+
   return (
     <NewModal
-      modalId="ModalTambahJurusan"
+      modalId="ModalTambahKategori"
       modalSize="lg"
       show={true}
       title={
         <>
           <h4 className="mb-1 fw-bold">
-            {editData ? "Edit Kategori Jurusan" : "Tambah Kategori Jurusan"}
+            {editData ? "Edit Kategori Barang" : "Tambah Kategori Barang"}
           </h4>
           <span className="fs-6 fw-normal">
             {editData
-              ? "Ubah data kategori jurusan yang sudah ada"
-              : "Isi data untuk menambahkan kategori jurusan baru"}
+              ? "Ubah data kategori barang yang sudah ada"
+              : "Isi data untuk menambahkan kategori barang baru"}
           </span>
         </>
       }
-      onCloseModal={onCloseModal}
+      onCloseModal={handleClose}
       content={
         <>
           <div className="row gy-4 mb-4">
             <div className="col-md-6">
-              <label className="form-label">Nama Jurusan</label>
+              <label className="form-label">Nama Kategori</label>
               <input
                 className="form-control"
-                placeholder="Contoh: SIJA"
+                placeholder="Contoh: Barang Umum"
                 name="nama"
                 value={formData.nama}
                 onChange={handleChange}
+                required
               />
             </div>
+            <div className="col-md-6">
+              <label className="form-label">Jenis Kolom</label>
+              <select
+                name="jenis_kolom"
+                className="form-select"
+                value={formData.jenis_kolom}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Pilih Jenis Kolom</option>
+                <option value="barang-umum">Barang Umum</option>
+                <option value="barang-jurusan">Barang Jurusan</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="row gy-4 mb-4">
             <div className="col-md-6">
               <label className="form-label">Slug</label>
               <input
                 className="form-control"
-                placeholder="Contoh: sija"
+                placeholder="Slug otomatis terisi"
                 name="slug"
                 value={formData.slug}
+                readOnly
+                required
+              />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Link</label>
+              <input
+                className="form-control"
+                placeholder="Contoh: /smartschool/barang-umum"
+                name="link"
+                value={formData.link}
                 onChange={handleChange}
+                required
               />
             </div>
           </div>
@@ -155,22 +203,12 @@ const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }
             <TextareaAutosize
               minRows={3}
               className="form-control"
-              placeholder="Tuliskan deskripsi kategori jurusan"
+              placeholder="Tuliskan deskripsi kategori barang"
               name="deskripsi"
               value={formData.deskripsi}
               onChange={handleChange}
+              required
             />
-          </div>
-
-          <div className="mb-4">
-            <label className="form-control text-muted bg-light">Link</label>
-              <input
-                className="form-control"
-                name="link"
-                placeholder={`/smartschool/barang-jurusan/${formData.slug || 'slug-anda'}`}
-                value=""
-                readOnly
-              />
           </div>
         </>
       }
@@ -191,4 +229,4 @@ const ModalTambahJurusan = ({ onCloseModal, refreshData, editData, setEditData }
   );
 };
 
-export default ModalTambahJurusan;
+export default ModalTambahKategori;

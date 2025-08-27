@@ -1,0 +1,28 @@
+.btnTambah {
+  padding: 10px 20px;
+  background: linear-gradient(to right, #267FEA, #12268B);
+  color: rgb(21, 55, 190);
+  font-weight: bold;
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: 0.3s ease;
+}
+
+.btnTambah:hover {
+  background: linear-gradient(to right, #1c5ec6, #0f1f6a);
+}
+
+.btnDetail {
+  padding: 6px 16px;
+  background: linear-gradient(to right, #267FEA, #12268B);
+  color: rgb(12, 60, 125);
+  font-weight: bold;
+  border: none;
+  font-size: 0.85rem;
+  transition: 0.3s ease;
+}
+
+.btnDetail:hover {
+  background: linear-gradient(to right, #1c5ec6, #0f1f6a);
+  transform: scale(1.05);
+}

@@ -2,48 +2,70 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { axiosInstance as axios } from "../../client/clientAxios";
 import ModalTambahPeminjaman from "./ModalTambahPeminjaman";
+import moment from "moment";
 
 const SectionPeminjamanAlat = () => {
   const [dataPeminjaman, setDataPeminjaman] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
-useEffect(() => {
-  const fetchPeminjaman = async () => {
+  useEffect(() => {
+    const fetchPeminjaman = async () => {
+      try {
+        const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
+        const res = await axios.get("/peminjaman", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const peminjamanDariAPI = res.data || [];
+
+        const peminjamanDenganNomor = peminjamanDariAPI.map((item, index) => ({
+          id: item.id,
+          no: index + 1,
+          tanggalPeminjaman: moment(item.tanggal_peminjaman).format("DD MMMM YYYY HH:mm"),
+          tanggalPengembalian: item.tanggal_pengembalian
+            ? moment(item.tanggal_pengembalian).format("DD MMMM YYYY HH:mm")
+            : "-",
+          waktuPeminjaman: item.waktu_peminjaman
+            ? `${item.waktu_peminjaman} Jam`
+            : "-",
+          kodeBarang: item.kode_barang,
+          namaBarang: item.nama_barang,
+          sanksi: item.sanksi || "-",
+          status:
+            item.status === "dikembalikan"
+              ? "Sudah Dikembalikan"
+              : "Belum Dikembalikan",
+        }));
+
+        setDataPeminjaman(peminjamanDenganNomor);
+      } catch (err) {
+        console.error("Gagal mengambil data peminjaman:", err);
+      }
+    };
+
+    fetchPeminjaman();
+  }, []);
+
+  const handleDelete = async (id) => {
+    const konfirmasi = window.confirm("Yakin ingin menghapus peminjaman ini?");
+    if (!konfirmasi) return;
+
     try {
-      const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
-
-      const res = await axios.get("http://localhost:3333/peminjaman", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const token = localStorage.getItem("ss-token")?.replace(/"/g, "");
+      await axios.delete(`/peminjaman/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      const peminjamanDariAPI = res.data || [];
-
-      const peminjamanDenganNomor = peminjamanDariAPI.map((item, index) => ({
-        id: item.id,
-        no: index + 1,
-        tanggalPeminjaman: item.tanggal_peminjaman,
-        tanggalPengembalian: item.tanggal_pengembalian || "-",
-        waktuPeminjaman: item.waktu_peminjaman || "3 Hari",
-        kodeBarang: item.kode_barang,
-        namaBarang: item.nama_barang,
-        sanksi: item.sanksi || "-",
-        status:
-          item.status === "dikembalikan"
-            ? "Sudah Dikembalikan"
-            : "Belum Dikembalikan",
-      }));
-
-      setDataPeminjaman(peminjamanDenganNomor);
+      setDataPeminjaman((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
-      console.error("Gagal mengambil data peminjaman:", err);
+      console.error("❌ Gagal hapus:", err);
+      alert("Gagal menghapus data.");
     }
   };
 
-  fetchPeminjaman();
-}, []);
+  const handleLihatDetail = (id) => {
+    router.push(`/smartschool/profil/peminjaman/${id}`);
+  };
 
   const getStatusBadge = (status) => {
     if (status === "Sudah Dikembalikan") {
@@ -69,14 +91,9 @@ useEffect(() => {
     }
   };
 
-  const handleLihatDetail = (id) => {
-    router.push(`/smartschool/profil/peminjaman/${id}`);
-  };
-
   return (
     <>
       <div className="d-flex flex-column gap-4">
-        {/* Header + Button Tambah */}
         <div className="mt-4 mb-4">
           <div className="d-flex justify-content-between align-items-center">
             <h5 className="fw-bold mb-0 text-dark">Peminjaman</h5>
@@ -98,36 +115,48 @@ useEffect(() => {
         </div>
 
         {/* Tabel Data */}
-        {dataPeminjaman.length > 0 ? (
-          <div className="mt-3 mb-5">
-            <div className="table-responsive">
-              <table className="table text-center align-middle mb-0">
-                <thead>
-                  <tr style={{ borderBottom: "2px solid #dee2e6" }}>
-                    <th>No</th>
-                    <th>Tanggal Peminjaman</th>
-                    <th>Tanggal Pengembalian</th>
-                    <th>Waktu Peminjaman</th>
-                    <th>Kode Barang</th>
-                    <th>Nama Barang</th>
-                    <th>Sanksi</th>
-                    <th>Status</th>
-                    <th style={{ width: "130px" }}>Lihat Detail</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {dataPeminjaman.length > 0 ? (
-                    dataPeminjaman.map((item) => (
-                      <tr key={item.id}>
-                        <td>{item.no}</td>
-                        <td className="fw-bold">{item.tanggalPeminjaman}</td>
-                        <td>{item.tanggalPengembalian}</td>
-                        <td>{item.waktuPeminjaman}</td>
-                        <td>{item.kodeBarang}</td>
-                        <td>{item.namaBarang}</td>
-                        <td>{item.sanksi}</td>
-                        <td>{getStatusBadge(item.status)}</td>
-                        <td>
+        <div className="mt-3 mb-5">
+          <div className="table-responsive">
+            <table className="table text-center align-middle mb-0">
+              <thead>
+                <tr style={{ borderBottom: "2px solid #dee2e6" }}>
+                  <th>No</th>
+                  <th>Tanggal Peminjaman</th>
+                  <th>Tanggal Pengembalian</th>
+                  <th>Waktu Peminjaman</th>
+                  <th>Kode Barang</th>
+                  <th>Nama Barang</th>
+                  <th>Sanksi</th>
+                  <th>Status</th>
+                  <th style={{ width: "130px" }}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {dataPeminjaman.length > 0 ? (
+                  dataPeminjaman.map((item) => (
+                    <tr
+                      key={item.id}
+                      className={item.status === "Sudah Dikembalikan" ? "row-kembalian" : ""}
+                    >
+                      <td>{item.no}</td>
+                      <td className="fw-bold">{item.tanggalPeminjaman}</td>
+                      <td>{item.tanggalPengembalian}</td>
+                      <td>{item.waktuPeminjaman}</td>
+                      <td>{item.kodeBarang}</td>
+                      <td>{item.namaBarang}</td>
+                      <td>{item.sanksi}</td>
+                      <td>{getStatusBadge(item.status)}</td>
+                      <td>
+                        {item.status === "Sudah Dikembalikan" ? (
+                          <div className="hapus-opsi d-flex justify-content-center">
+                            <button
+                              className="btn btn-danger btn-sm rounded-pill"
+                              onClick={() => handleDelete(item.id)}
+                            >
+                              🗑 Hapus
+                            </button>
+                          </div>
+                        ) : (
                           <button
                             className="btn rounded-pill btn-sm"
                             style={{
@@ -142,23 +171,21 @@ useEffect(() => {
                           >
                             Lihat Detail
                           </button>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="9" className="text-muted text-center py-4">
-                        Belum ada data peminjaman
+                        )}
                       </td>
                     </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="9" className="text-muted text-center py-4">
+                      Belum ada data peminjaman
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
-        ) : (
-          <p className="text-center text-muted">Belum ada data peminjaman.</p>
-        )}
+        </div>
       </div>
 
       {/* Modal Tambah Peminjaman */}
@@ -167,7 +194,6 @@ useEffect(() => {
           show={showModal}
           onClose={() => setShowModal(false)}
           onRefresh={() => {
-            // Refresh data setelah tambah
             setShowModal(false);
             window.location.reload();
           }}

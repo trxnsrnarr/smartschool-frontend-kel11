@@ -1,4 +1,3 @@
-// components/Barang/ModalTambahBarangJurusan.js
 import { DatePicker, InputNumber } from "antd";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -25,7 +24,7 @@ const initialFormData = {
   deskripsi: "",
   status: "",
   kategori_barang: "",
-  m_kategori_barang_id: "",
+  m_kategori_barang_id: 2, // ⬅️ static ID kategori jurusan
   waktu_peminjaman: null,
   sanksi: "",
   mLokasiId: null,
@@ -41,7 +40,6 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
   const [buttonState, setButtonState] = useState("idle");
   const [listLokasi, setListLokasi] = useState([]);
   const [listKategori, setListKategori] = useState([]);
-  const [listKategoriBarang, setListKategoriBarang] = useState([]);
   const isEdit = !!editData;
 
   const handleChangeInput = (e, uploadedFile) => {
@@ -62,8 +60,8 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
     spesifikasi: formData.spesifikasi,
     deskripsi: formData.deskripsi,
     status: formData.status,
-    m_kategori_barang_id: parseInt(formData.m_kategori_barang_id) || null,
-    waktu_peminjaman: formData.waktu_peminjaman || null, 
+    m_kategori_barang_id: parseInt(formData.m_kategori_barang_id),
+    waktu_peminjaman: formData.waktu_peminjaman || null,
     sanksi: formData.sanksi,
     m_lokasi_id: parseInt(formData.mLokasiId),
     foto: formData.foto,
@@ -72,9 +70,9 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
   });
 
   const handleSubmit = async () => {
-    const { nama, merk, kodeBarang, tahunBeli, deskripsi, harga, foto, mLokasiId, kategori_barang } = formData;
+    const { nama, merk, kodeBarang, tahunBeli, deskripsi, harga, foto, mLokasiId, kategori_barang, m_kategori_barang_id } = formData;
 
-    if (!nama || !merk || !kodeBarang || !tahunBeli || !deskripsi || !harga || !foto || !mLokasiId || !kategori_barang) {
+    if (!nama || !merk || !kodeBarang || !tahunBeli || !deskripsi || !harga || !foto || !mLokasiId || !kategori_barang || !m_kategori_barang_id) {
       toast.error("Harap lengkapi data");
       return;
     }
@@ -82,55 +80,33 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
     const payload = setupPayload();
 
     try {
+      setButtonState("loading");
+
       const result = isEdit
         ? await updateBarang(editData.id, payload)
         : await postBarang(payload);
 
       const data = result?.data?.data;
       const message = result?.data?.message;
-
       const error = result?.error;
 
-      console.log("✅ DATA:", data);
-      console.log("❌ ERROR:", error);
-
-      if (error) {
+      if (error || !data?.id) {
         toast.error(error?.message || "Gagal menyimpan");
         setButtonState("error");
         return;
       }
 
-      // Pastikan data valid (data harus punya ID atau minimal field penting)
-      if (!data || !data.id) {
-        console.error("❌ Data tidak valid:", data);
-        toast.error("Data tidak berhasil disimpan");
-        setButtonState("error");
-        return;
-      }
-      
-      if (!formData.m_kategori_barang_id || !formData.kategori_barang) {
-        toast.error("Kategori barang dan jurusan harus diisi");
-        setButtonState("error");
-        return;
-      }
-
-      // ✅ Jika berhasil
       toast.success(message || (isEdit ? "Barang berhasil diubah" : "Barang berhasil ditambahkan"));
       setButtonState("success");
       router.reload();
 
-      // Reset form jika bukan edit
       if (!isEdit) {
         setFormData({ ...initialFormData, mSekolahId: sekolah?.id || null });
       }
 
       setEditData(null);
       onCloseModal?.();
-
-      // 🔁 Reload data barang
-      setTimeout(() => {
-        _getBarang?.();
-      }, 500);
+      setTimeout(() => _getBarang?.(), 500);
 
     } catch (err) {
       toast.error(err?.response?.data?.message || err?.message || "Terjadi kesalahan");
@@ -139,21 +115,14 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
   };
 
   const getData = async () => {
-    const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
-    console.log("listKategori", listKategori);
-    console.log("listKategoriBarang", listKategoriBarang);
-    console.log("formData", formData);
-
     const lokasi = await getSarana().then((res) => res?.data?.lokasi?.data || []);
     setListLokasi(lokasi.map((l) => ({ value: l.id, label: l.nama })));
 
+    const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
     const jurusan = await clientAxios.get("/jurusan-barang", {
       headers: { Authorization: `Bearer ${token}` },
     });
     setListKategori(jurusan?.data?.data || []);
-
-    const kategori = await fetch("http://localhost:3333/kategori-barang").then((res) => res.json());
-    setListKategoriBarang(kategori.map((item) => ({ value: item.id, label: item.nama })));
   };
 
   useEffect(() => {
@@ -168,8 +137,8 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
         deskripsi: editData.deskripsi,
         status: editData.status || "",
         kategori_barang: editData.kategori_barang || "",
-        m_kategori_barang_id: editData.m_kategori_barang_id || "",
-        waktu_peminjaman: editData.waktu_peminjaman || null, 
+        m_kategori_barang_id: editData.m_kategori_barang_id || 2,
+        waktu_peminjaman: editData.waktu_peminjaman || null,
         sanksi: editData.sanksi || "",
         mLokasiId: editData.m_lokasi_id,
         foto: editData.foto || "",
@@ -184,15 +153,10 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
     getData();
   }, []);
 
-    const mappedKategori = listKategori.map((item) => ({
-      value: item.id,
-      label: item.nama,
-    }));
-
-    const mappedKategoriBarang = listKategoriBarang.map((item) => ({
-      value: item.value,
-      label: item.label,
-    }));
+  const mappedKategori = listKategori.map((item) => ({
+    value: item.id,
+    label: item.nama,
+  }));
 
   return (
     <NewModal
@@ -245,12 +209,12 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
           <div className="row gy-4 mb-4">
             <div className="col-md-6">
               <label className="form-label">Tanggal Dibeli</label>
-              <DatePicker
-                className="w-100"
-                value={formData.tahunBeli ? moment(formData.tahunBeli) : null}
-                onChange={(date) => handleChangeDate(date, "tahunBeli")}
-                getPopupContainer={(triggerNode) => triggerNode.parentNode}
-              />
+                <DatePicker
+                  className="w-100"
+                  value={formData.tahunBeli ? moment(formData.tahunBeli) : null}
+                  onChange={(date) => handleChangeDate(date, "tahunBeli")}
+                  getPopupContainer={(triggerNode) => triggerNode.parentNode}
+                />
             </div>
             <div className="col-md-6">
               <label className="form-label">Waktu Peminjaman</label>
@@ -287,30 +251,23 @@ const ModalTambahBarangJurusan = ({ show, editData = null, setEditData, _getBara
           <div className="row gy-4 mb-4">
             <div className="col-md-6">
               <label className="form-label">Pilih Jurusan</label>
-                <Select
-                  placeholder="Pilih Jurusan"
-                  value={mappedKategori.find((item) => item.value === formData.kategori_barang) || null}
-                  options={mappedKategori}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      kategori_barang: e.value, // ✅ Sekarang e.value = ID, bukan 'SIJA' lagi
-                    }))
-                  }
-                  isSearchable
-                />
-            </div>
-            <div className="col-md-6">
-              <label className="form-label">Kategori Barang</label>
               <Select
-                placeholder="Pilih Kategori"
-                value={mappedKategoriBarang.find((item) => item.value === formData.m_kategori_barang_id) || null}
-                options={mappedKategoriBarang}
+                placeholder="Pilih Jurusan"
+                value={mappedKategori.find((item) => item.value === formData.kategori_barang) || null}
+                options={mappedKategori}
                 onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, m_kategori_barang_id: e.value }))
+                  setFormData((prev) => ({
+                    ...prev,
+                    kategori_barang: e.value,
+                  }))
                 }
                 isSearchable
               />
+            </div>
+            <div className="col-md-6">
+              <label className="form-label">Kategori Barang</label>
+              <input className="form-control" value="Jurusan" disabled />
+              <input type="hidden" name="m_kategori_barang_id" value={formData.m_kategori_barang_id || 2} />
             </div>
           </div>
 

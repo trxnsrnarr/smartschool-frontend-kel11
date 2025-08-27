@@ -5,7 +5,9 @@ import Layout from "../../../components/Layout/Layout";
 import AnimatePage from "../../../components/Shared/AnimatePage/AnimatePage";
 import SideNavBarang from "../../../components/Barang/SideNavBarang";
 import CardKategoriBarang from "../../../components/Barang/CardKategoriBarang";
-import ModalTambahTambah from "../../../components/Barang/ModalTambahTambah";
+import ModalTambahKategori from "../../../components/Barang/ModalTambahKategori";
+import swal from "sweetalert";
+import toast from "react-hot-toast";
 import { axiosInstance as clientAxios } from "../../../client/clientAxios";
 
 const Index = () => {
@@ -13,18 +15,34 @@ const Index = () => {
   const [activeMenu, setActiveMenu] = useState("/");
   const [kategoriBarang, setKategoriBarang] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [editData, setEditData] = useState(null);
 
   const fetchKategoriBarang = async () => {
     const token = JSON.parse(localStorage.getItem("ss-token"));
     if (!token) return;
 
     try {
-      const res = await clientAxios.get("/kategori-barang", {
+      // Dapatkan m_sekolah_id dari profil user terlebih dahulu
+      const resProfil = await clientAxios.get("/profil", {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      const m_sekolah_id = resProfil.data?.user?.m_sekolah_id;
+      if (!m_sekolah_id) {
+        toast.error("ID sekolah tidak ditemukan");
+        return;
+      }
+
+      // Kirim m_sekolah_id sebagai query parameter
+      const res = await clientAxios.get(`/kategori-barang?m_sekolah_id=${m_sekolah_id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      console.log("Data kategori received:", res.data);
       setKategoriBarang(res.data || []);
     } catch (err) {
-      console.log("ERR", err);
+      console.log("ERR", err.response?.data || err);
+      toast.error("Gagal mengambil data kategori");
     }
   };
 
@@ -32,8 +50,44 @@ const Index = () => {
     fetchKategoriBarang();
   }, []);
 
-  const handleTambah = () => setShowModal(true);
-  const handleCloseModal = () => setShowModal(false);
+  const handleTambah = () => {
+    setEditData(null);
+    setShowModal(true);
+  };
+
+  const handleEdit = (item) => {
+    setEditData(item);
+    setShowModal(true);
+  };
+
+  const handleDelete = async (item) => {
+    swal({
+      title: "Yakin ingin menghapus?",
+      text: `Kategori "${item.nama}" akan dihapus.`,
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    }).then(async (willDelete) => {
+      if (willDelete) {
+        try {
+          const token = JSON.parse(localStorage.getItem("ss-token"));
+          await clientAxios.delete(`/kategori-barang/${item.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          toast.success("Kategori berhasil dihapus.");
+          fetchKategoriBarang(); // ✅ REFRESH SETELAH HAPUS
+        } catch (error) {
+          console.error("Gagal hapus:", error);
+          toast.error("Gagal menghapus kategori.");
+        }
+      }
+    });
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setEditData(null);
+  };
 
   return (
     <Layout>
@@ -61,18 +115,31 @@ const Index = () => {
               >
                 <div>
                   <h5 className="fw-bold mb-0" style={{ color: "#3A4166" }}>
-                    Daftar Barang
+                    Daftar Kategori Barang
                   </h5>
                 </div>
               </div>
 
               <div className="row gy-4">
-                <CardKategoriBarang dataKategori={kategoriBarang} />
+                <CardKategoriBarang 
+                  dataKategori={kategoriBarang} 
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
               </div>
             </div>
           </div>
         </AnimatePage>
       </div>
+
+      {showModal && (
+        <ModalTambahKategori
+          editData={editData}
+          setEditData={setEditData}
+          onCloseModal={handleCloseModal}
+          refreshData={fetchKategoriBarang} // ✅ PASS refreshData FUNCTION
+        />
+      )}
     </Layout>
   );
 };

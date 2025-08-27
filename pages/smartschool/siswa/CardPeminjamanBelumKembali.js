@@ -8,7 +8,6 @@ const CardPeminjamanBelumKembali = () => {
   const [peminjaman, setPeminjaman] = useState([]);
   const [now, setNow] = useState(moment());
 
-  // Ambil data saat mount
   useEffect(() => {
     const fetchPeminjaman = async () => {
       try {
@@ -21,7 +20,8 @@ const CardPeminjamanBelumKembali = () => {
         const belum = semua.filter(
           (item) =>
             item.status?.toLowerCase() !== "dikembalikan" &&
-            item.tanggal_pengembalian
+            item.tanggal_pengembalian &&
+            item.tanggal_peminjaman
         );
         setPeminjaman(belum);
       } catch (err) {
@@ -32,7 +32,6 @@ const CardPeminjamanBelumKembali = () => {
     fetchPeminjaman();
   }, []);
 
-  // Perbarui waktu setiap detik (untuk countdown)
   useEffect(() => {
     const interval = setInterval(() => {
       setNow(moment());
@@ -40,20 +39,33 @@ const CardPeminjamanBelumKembali = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // Format durasi ke bentuk HH:mm:ss
-  const formatSisaWaktu = (tanggalKembali) => {
-    const durasi = moment.duration(moment(tanggalKembali).diff(now));
-    if (durasi.asMilliseconds() <= 0) return "Sudah lewat waktu!";
-    const jam = Math.floor(durasi.asHours()).toString().padStart(2, "0");
-    const menit = durasi.minutes().toString().padStart(2, "0");
-    const detik = durasi.seconds().toString().padStart(2, "0");
-    return `${jam}:${menit}:${detik}`;
+  const formatSisaWaktu = (tanggalPinjam, tanggalKembali) => {
+    const mulai = moment(tanggalPinjam);
+    const kembali = moment(tanggalKembali);
+
+    const totalDurasi = moment.duration(kembali.diff(mulai));
+    const durasiBerjalan = moment.duration(now.diff(mulai));
+
+    const sisa = moment.duration(totalDurasi - durasiBerjalan);
+    if (sisa.asMilliseconds() <= 0) return "⏰ Waktu telah habis!";
+
+    const jam = Math.floor(sisa.asHours()).toString().padStart(2, "0");
+    const menit = sisa.minutes().toString().padStart(2, "0");
+    const detik = sisa.seconds().toString().padStart(2, "0");
+    return `⏳ Tersisa ${jam} jam ${menit} menit ${detik} detik`;
+  };
+
+  const isWaktuKritis = (tanggalKembali) => {
+    const sekarang = moment();
+    const kembali = moment(tanggalKembali);
+    const sisa = moment.duration(kembali.diff(sekarang));
+    return sisa.asHours() <= 2;
   };
 
   return (
     <div className="card card-ss card-absen-kelas pb-3 mb-4">
       <div className="card-header-ss px-3 d-flex align-items-center text-white">
-        <h5 className="fw-extrabold mb-0">Peminjaman alat</h5>
+        <h5 className="fw-extrabold mb-0">Peminjaman Alat</h5>
       </div>
 
       <div className="card-body p-3">
@@ -78,27 +90,31 @@ const CardPeminjamanBelumKembali = () => {
                 backgroundColor: "#F9F9F9",
                 border: "1px solid #E4E4E4",
                 padding: "10px",
-                transition: "0.3s",
               }}
             >
-              {/* Notifikasi countdown */}
+              {/* Countdown */}
               <div
-                className="px-3 py-2 text-white mb-3"
+                className="px-3 py-2 mb-3"
                 style={{
-                  backgroundColor: "#C2140B",
+                  backgroundColor: isWaktuKritis(item.tanggal_pengembalian)
+                    ? "#C2140B"
+                    : "#dee2e6",
+                  color: isWaktuKritis(item.tanggal_pengembalian)
+                    ? "#fff"
+                    : "#6c757d",
                   borderRadius: "20px",
                   fontWeight: "bold",
-                  fontSize: "0.85rem",
-                  width: "100%",
-                  height: "40px",
+                  fontSize: "0.9rem",
                   textAlign: "center",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   userSelect: "none",
+                  minHeight: "40px",
+                  transition: "all 0.3s ease",
                 }}
               >
-                Segera Kembalikan dalam {formatSisaWaktu(item.tanggal_pengembalian)}
+                {formatSisaWaktu(item.tanggal_peminjaman, item.tanggal_pengembalian)}
               </div>
 
               {/* Detail barang */}
@@ -115,17 +131,19 @@ const CardPeminjamanBelumKembali = () => {
                   >
                     <div
                       style={{ width: "110px" }}
-                      className="fw-bold text-danger"
+                      className={`fw-bold ${isWaktuKritis(item.tanggal_pengembalian) ? "text-danger" : "text-secondary"}`}
                     >
                       {data.label}
                     </div>
                     <div
                       style={{ width: "10px" }}
-                      className="fw-bold text-danger"
+                      className={`fw-bold ${isWaktuKritis(item.tanggal_pengembalian) ? "text-danger" : "text-secondary"}`}
                     >
                       :
                     </div>
-                    <div className="fw-bold text-danger">{data.value}</div>
+                    <div className={`fw-bold ${isWaktuKritis(item.tanggal_pengembalian) ? "text-danger" : "text-secondary"}`}>
+                      {data.value}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -134,25 +152,23 @@ const CardPeminjamanBelumKembali = () => {
         )}
       </div>
 
-      {/* Tombol navigasi jika ada data */}
-      {peminjaman.length > 0 && (
-        <div className="text-center px-3 pb-3">
-          <button
-            className="btn btn-primary rounded-pill fw-bold"
-            style={{
-              background: "linear-gradient(to right, #267FEA, #12268B)",
-              border: "none",
-              padding: "6px 20px",
-              width: "100%",
-              height: "40px",
-              fontSize: "0.9rem",
-            }}
-            onClick={() => router.push(`/smartschool/profil?nav=peminjaman`)}
-          >
-            Lihat Lainnya
-          </button>
-        </div>
-      )}
+      {/* Tombol navigasi: SELALU tampil */}
+      <div className="text-center px-3 pb-3">
+        <button
+          className="btn btn-primary rounded-pill fw-bold"
+          style={{
+            background: "linear-gradient(to right, #267FEA, #12268B)",
+            border: "none",
+            padding: "6px 20px",
+            width: "100%",
+            height: "40px",
+            fontSize: "0.9rem",
+          }}
+          onClick={() => router.push(`/smartschool/profil?nav=peminjaman`)}
+        >
+          Lihat Detail Peminjaman
+        </button>
+      </div>
     </div>
   );
 };

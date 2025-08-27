@@ -35,10 +35,14 @@ const BarangUmum = () => {
           }),
         ]);
 
-        const barangList = barangRes.data.barang.data || [];
+        // ✅ GUNAKAN CARA YANG SUDAH TERBUKTI BEKERJA
+        const barangList = barangRes.data.barang?.data || barangRes.data.data || [];
+        
+        // ✅ FILTER BERDASARKAN KATEGORI BARANG YANG KOSONG (UMUM)
         const barangUmumOnly = barangList.filter(
           (item) =>
-            (!item.kategori_barang || item.kategori_barang === "") &&
+            (!item.kategori_barang || item.kategori_barang === "" || 
+             item.m_kategori_barang_id === null) && // Tambahkan kondisi null
             item.status?.toLowerCase() === "tersedia"
         );
 
@@ -254,7 +258,8 @@ const BarangUmum = () => {
             setShowModalBarang(false);
             setEditData(null);
           }}
-          _getBarang={() => {}}
+          _getBarang={() => window.location.reload()} // Refresh halaman
+          jenisKategori="Umum" // ✅ INI YANG PERLU DITAMBAHKAN
         />
       </div>
     </Layout>

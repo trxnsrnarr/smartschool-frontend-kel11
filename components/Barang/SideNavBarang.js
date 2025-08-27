@@ -29,7 +29,7 @@ const SideNavBarang = () => {
         <Link href={`/smartschool/peminjaman`}>
           <a
             className={`nav-link ${
-              ["/smartschool/peminjaman", "/smartschool/peminjaman/barang-umum", "/smartschool/peminjaman/barang-jurusan", "/smartschool/peminjaman/barang-jurusan/${jurusan.slug}"].includes(activeMenu) && "active"
+              ["/smartschool/peminjaman", "/smartschool/peminjaman/barang-umum", "/smartschool/peminjaman/barang-jurusan", "/smartschool/peminjaman/jurusan/${slug}"].includes(activeMenu) && "active"
             } color-dark fw-bold fs-18-ss d-flex align-items-center px-4 mb-3`}
             aria-current="page"
           >

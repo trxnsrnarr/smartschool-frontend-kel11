@@ -10,6 +10,7 @@ import { hideModal } from "../../utilities/ModalUtils";
 import NewModal from "../Shared/NewModal/NewModal";
 import SelectShared from "../Shared/SelectShared/SelectShared";
 import UploadPhoto from "../Shared/UploadPhoto.js/UploadPhoto";
+import { axiosInstance as clientAxios } from "../../client/clientAxios";
 import moment from "moment";
 
 const initialFormData = {
@@ -28,7 +29,14 @@ const initialFormData = {
   mSekolahId: null,
 };
 
-const ModalTambahBarang = ({ show, editData = null, setEditData, _getBarang, onCloseModal }) => {
+const ModalTambahBarang = ({ 
+  show, 
+  editData = null, 
+  setEditData, 
+  _getBarang, 
+  onCloseModal,
+  jenisKategori = null
+}) => {
   const { sekolah } = useSekolah();
   const isEdit = editData !== null;
   const [buttonState, setButtonState] = useState("idle");
@@ -65,73 +73,75 @@ const ModalTambahBarang = ({ show, editData = null, setEditData, _getBarang, onC
     return tempData;
   };
 
-  const handleSubmit = async () => {
-    // Validasi wajib di frontend
-    const requiredFields = [
-      { field: 'nama', message: 'Nama barang harus diisi' },
-      { field: 'kodeBarang', message: 'Kode barang harus diisi' },
-      { field: 'merk', message: 'Merk harus diisi' },
-      { field: 'tahunBeli', message: 'Tahun pembelian harus diisi' },
-      { field: 'harga', message: 'Harga harus diisi' },
-      { field: 'spesifikasi', message: 'Spesifikasi harus diisi' },
-      { field: 'deskripsi', message: 'Deskripsi harus diisi' },
-      { field: 'foto', message: 'Foto barang harus diunggah' },
-      { field: 'mLokasiId', message: 'Lokasi harus dipilih' },
-    ];
+const handleSubmit = async () => {
+  // Validasi wajib di frontend
+  const requiredFields = [
+    { field: 'nama', message: 'Nama barang harus diisi' },
+    { field: 'kodeBarang', message: 'Kode barang harus diisi' },
+    { field: 'merk', message: 'Merk harus diisi' },
+    { field: 'tahunBeli', message: 'Tahun pembelian harus diisi' },
+    { field: 'harga', message: 'Harga harus diisi' },
+    { field: 'spesifikasi', message: 'Spesifikasi harus diisi' },
+    { field: 'deskripsi', message: 'Deskripsi harus diisi' },
+    { field: 'foto', message: 'Foto barang harus diunggah' },
+    { field: 'mLokasiId', message: 'Lokasi harus dipilih' },
+  ];
 
-    for (const { field, message } of requiredFields) {
-      if (!formData[field]) {
-        toast.error(message);
-        return;
-      }
-    }
-
-    if (!kategoriBarangId) {
-      toast.error('Kategori barang harus dipilih');
+  for (const { field, message } of requiredFields) {
+    if (!formData[field]) {
+      toast.error(message);
       return;
     }
+  }
 
-    try {
-      setButtonState('loading');
-      
-      const payload = {
-        kode_barang: formData.kodeBarang,
-        nama: formData.nama,
-        merk: formData.merk,
-        spesifikasi: formData.spesifikasi,
-        deskripsi: formData.deskripsi,
-        harga: parseInt(formData.harga),
-        status: formData.status || 'tersedia',
-        waktu_peminjaman: formData.waktu_peminjaman ? parseInt(formData.waktu_peminjaman) : null,
-        sanksi: formData.sanksi || '',
-        m_lokasi_id: parseInt(formData.mLokasiId),
-        m_kategori_barang_id: parseInt(kategoriBarangId),
-        foto: formData.foto,
-        tanggal_dibeli: formData.tahunBeli.format('YYYY-MM-DD')
-      };
+  // Fallback kategori ID
+  const finalKategoriId = kategoriBarangId || (jenisKategori?.toLowerCase() === "umum" ? 1 : null);
 
-      const { data, error } = isEdit 
-        ? await updateBarang(editData.id, payload)
-        : await postBarang(payload);
+  if (!finalKategoriId) {
+    toast.error("Kategori barang harus dipilih");
+    return;
+  }
 
-      if (error) throw new Error(error.message);
+  try {
+    setButtonState('loading');
 
-      toast.success(data.message);
-      setButtonState('success');
-      window.location.reload(); 
-      
-      // Reset form dan refresh data
-      setFormData(initialFormData);
-      setKategoriBarangId(null);
-      onCloseModal();
-      _getBarang();
+    const payload = {
+      kode_barang: formData.kodeBarang,
+      nama: formData.nama,
+      merk: formData.merk,
+      spesifikasi: formData.spesifikasi,
+      deskripsi: formData.deskripsi,
+      harga: parseInt(formData.harga),
+      status: formData.status || 'tersedia',
+      waktu_peminjaman: formData.waktu_peminjaman ? parseInt(formData.waktu_peminjaman) : null,
+      sanksi: formData.sanksi || '',
+      m_lokasi_id: parseInt(formData.mLokasiId),
+      m_kategori_barang_id: parseInt(finalKategoriId), // ✅ Fix disini
+      foto: formData.foto,
+      tanggal_dibeli: formData.tahunBeli.format('YYYY-MM-DD'),
+    };
 
-    } catch (error) {
-      setButtonState('error');
-      toast.error(error.message || 'Gagal menyimpan data barang');
-      console.error('Submit error:', error);
-    }
-  };
+    const { data, error } = isEdit
+      ? await updateBarang(editData.id, payload)
+      : await postBarang(payload);
+
+    if (error) throw new Error(error.message);
+
+    toast.success(data.message);
+    setButtonState('success');
+
+    setFormData(initialFormData);
+    setKategoriBarangId(null);
+    setEditData(null);
+    onCloseModal();
+    await _getBarang();
+  } catch (error) {
+    setButtonState('error');
+    toast.error(error.message || 'Gagal menyimpan data barang');
+    console.error('Submit error:', error);
+  }
+};
+
 
   useEffect(() => {
     (async () => {
@@ -143,29 +153,29 @@ const ModalTambahBarang = ({ show, editData = null, setEditData, _getBarang, onC
     })();
   }, []);
 
-  useEffect(() => {
-    const fetchKategoriList = async () => {
-      try {
-        const res = await fetch("http://localhost:3333/kategori-barang");
-        const data = await res.json();
+useEffect(() => {
+  const fetchKategoriList = async () => {
+    try {
+      const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
+      const sekolahId = localStorage.getItem("m_sekolah_id");
 
-        if (Array.isArray(data)) {
-          const options = data.map((kategori) => ({
-            value: kategori.id,
-            label: kategori.nama,
-          }));
-          setListKategoriBarang(options);
-        } else {
-          toast.error("Gagal ambil daftar kategori");
-        }
-      } catch (err) {
-        console.error("Error ambil kategori:", err);
-        toast.error("Gagal fetch kategori barang");
-      }
-    };
+      const res = await clientAxios.get("/kategori-barang", {
+        params: { m_sekolah_id: sekolahId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    fetchKategoriList();
-  }, []);
+      const kategoriData = res.data.data || res.data || [];
+      console.log("✅ Semua kategori:", kategoriData);
+
+    } catch (err) {
+      console.error("Gagal fetch kategori barang:", err);
+      toast.error("Gagal mengambil data kategori");
+    }
+  };
+
+  if (show) fetchKategoriList();
+}, [show, jenisKategori]);
+
 
   useEffect(() => {
     if (editData !== null) {
@@ -187,8 +197,12 @@ const ModalTambahBarang = ({ show, editData = null, setEditData, _getBarang, onC
       setKategoriBarangId(editData.m_kategori_barang_id || null);
     } else {
       setFormData({ ...initialFormData, mSekolahId: sekolah?.id || null });
+      // ✅ RESET KATEGORI ID JIKA BUKAN EDIT
+      if (!jenisKategori) {
+        setKategoriBarangId(null);
+      }
     }
-  }, [editData]);
+  }, [editData, sekolah, jenisKategori]);
 
   return (
     <NewModal
@@ -201,6 +215,9 @@ const ModalTambahBarang = ({ show, editData = null, setEditData, _getBarang, onC
           <h4 className="mb-1 fw-extrabold">{isEdit ? "Ubah" : "Tambah"} Barang</h4>
           <span className="fs-6 fw-normal">
             Isi informasi dibawah untuk {isEdit ? "mengubah" : "menambahkan"} Barang
+            {jenisKategori && (
+              <span className="text-primary ms-2">({jenisKategori})</span>
+            )}
           </span>
         </>
       }
@@ -275,12 +292,16 @@ const ModalTambahBarang = ({ show, editData = null, setEditData, _getBarang, onC
 
           <div className="row gy-4 mb-4">
             <div className="col-md-6">
-              <label className="form-label"> Id Kategori Barang</label>
-              <SelectShared
-                placeholder="Pilih Kategori"
-                handleChangeSelect={(e) => setKategoriBarangId(e.value)}
-                value={kategoriBarangId}
-                options={listKategoriBarang}
+              <label className="form-label">Kategori Barang</label>
+              <input 
+                className="form-control" 
+                value="Umum" 
+                disabled 
+              />
+              <input 
+                type="hidden" 
+                name="m_kategori_barang_id" 
+                value={kategoriBarangId || 1} 
               />
             </div>
             <div className="col-md-6">

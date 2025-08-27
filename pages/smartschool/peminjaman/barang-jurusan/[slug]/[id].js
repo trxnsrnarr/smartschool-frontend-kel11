@@ -70,15 +70,6 @@ const DetailPeminjamanPage = () => {
               <div className="rounded-ss p-4 mb-4" style={{ background: "#F4F4F7" }}>
                 <div className="d-flex justify-content-center gap-3 flex-wrap">
                   <div className="text-center">
-                    <p className="fw-bold">Foto Barang</p>
-                    <img
-                      src={dataDetail.foto_peminjaman || "/img/default.png"}
-                      alt="Foto Barang"
-                      className="rounded"
-                      style={{ height: "150px", objectFit: "cover" }}
-                    />
-                  </div>
-                  <div className="text-center">
                     <p className="fw-bold">Foto Peminjaman</p>
                     <img
                       src={dataDetail.foto_peminjaman || "/img/default.png"}
