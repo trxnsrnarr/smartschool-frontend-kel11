@@ -19,24 +19,37 @@ const SectionPeminjamanAlat = () => {
 
         const peminjamanDariAPI = res.data || [];
 
-        const peminjamanDenganNomor = peminjamanDariAPI.map((item, index) => ({
-          id: item.id,
-          no: index + 1,
-          tanggalPeminjaman: moment(item.tanggal_peminjaman).format("DD MMMM YYYY HH:mm"),
-          tanggalPengembalian: item.tanggal_pengembalian
-            ? moment(item.tanggal_pengembalian).format("DD MMMM YYYY HH:mm")
-            : "-",
-          waktuPeminjaman: item.waktu_peminjaman
-            ? `${item.waktu_peminjaman} Jam`
-            : "-",
-          kodeBarang: item.kode_barang,
-          namaBarang: item.nama_barang,
-          sanksi: item.sanksi || "-",
-          status:
-            item.status === "dikembalikan"
-              ? "Sudah Dikembalikan"
-              : "Belum Dikembalikan",
-        }));
+        const peminjamanDenganNomor = peminjamanDariAPI.map((item, index) => {
+          // Tentukan status
+          let statusText = "Belum Dikembalikan";
+          if (item.status === "dikembalikan") {
+            statusText = "Sudah Dikembalikan";
+          } else if (item.tanggal_pengembalian) {
+            const now = new Date();
+            const tglPengembalian = new Date(item.tanggal_pengembalian);
+            if (tglPengembalian < now) {
+              statusText = "Telat Dikembalikan !"; // tetap dianggap belum dikembalikan
+            }
+          }
+
+          return {
+            id: item.id,
+            no: index + 1,
+            tanggalPeminjaman: moment(item.tanggal_peminjaman).format(
+              "DD MMMM YYYY HH:mm"
+            ),
+            tanggalPengembalian: item.tanggal_pengembalian
+              ? moment(item.tanggal_pengembalian).format("DD MMMM YYYY HH:mm")
+              : "-",
+            waktuPeminjaman: item.waktu_peminjaman
+              ? `${item.waktu_peminjaman} Jam`
+              : "-",
+            kodeBarang: item.kode_barang,
+            namaBarang: item.nama_barang,
+            sanksi: item.sanksi || "-",
+            status: statusText,
+          };
+        });
 
         setDataPeminjaman(peminjamanDenganNomor);
       } catch (err) {
@@ -69,25 +82,10 @@ const SectionPeminjamanAlat = () => {
 
   const getStatusBadge = (status) => {
     if (status === "Sudah Dikembalikan") {
-      return (
-        <span
-          className="badge px-3 py-2 rounded-pill"
-          style={{ backgroundColor: "#4EB701", color: "white" }}
-        >
-          {status}
-        </span>
-      );
-    } else if (status === "Belum Dikembalikan") {
-      return (
-        <span
-          className="badge px-3 py-2 rounded-pill"
-          style={{ backgroundColor: "#C2140B", color: "white" }}
-        >
-          {status}
-        </span>
-      );
+      return <span style={{ backgroundColor: "#4EB701", color: "white" }} className="badge px-3 py-2 rounded-pill">{status}</span>;
     } else {
-      return <span>{status}</span>;
+      // untuk "Belum Dikembalikan" dan "Telat"
+      return <span style={{ backgroundColor: "#C2140B", color: "white" }} className="badge px-3 py-2 rounded-pill">{status}</span>;
     }
   };
 

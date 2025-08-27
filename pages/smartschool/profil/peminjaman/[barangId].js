@@ -1,5 +1,3 @@
-// pages/smartschool/profil/peminjaman/[barangId].js
-
 import LayoutDetail from "components/Layout/LayoutDetail";
 import AnimatePage from "components/Shared/AnimatePage/AnimatePage";
 import { useRouter } from "next/router";
@@ -47,6 +45,50 @@ const PeminjamanDetailPage = () => {
   if (loading) return <p className="text-center mt-5">Loading...</p>;
   if (!barang) return <p className="text-center mt-5">Barang tidak ditemukan</p>;
 
+  // Fungsi cek status
+  const getStatusText = () => {
+    if (barang.status === "dikembalikan") return "Sudah Dikembalikan";
+
+    const now = new Date();
+    const tanggalPengembalian = barang.tanggal_pengembalian ? new Date(barang.tanggal_pengembalian) : null;
+
+    if (barang.status !== "dikembalikan" && tanggalPengembalian && tanggalPengembalian < now) {
+      return "Telat Dikembalikan";
+    }
+
+    return "Belum Dikembalikan";
+  };
+
+  const isKembaliDisabled = () => {
+    const status = getStatusText();
+    return status === "Sudah Dikembalikan" || status === "Telat Dikembalikan";
+  };
+
+  // Badge warna untuk status
+  const getStatusBadge = () => {
+    const status = getStatusText();
+    if (status === "Sudah Dikembalikan") {
+      return (
+        <span
+          className="badge px-3 py-2 rounded-pill"
+          style={{ backgroundColor: "#4EB701", color: "white" }}
+        >
+          {status}
+        </span>
+      );
+    } else {
+      // Belum dikembalikan + telat dikembalikan warnanya sama (#C2140B)
+      return (
+        <span
+          className="badge px-3 py-2 rounded-pill"
+          style={{ backgroundColor: "#C2140B", color: "white" }}
+        >
+          {status}
+        </span>
+      );
+    }
+  };
+
   return (
     <LayoutDetail title="Detail Peminjaman">
       <AnimatePage>
@@ -92,7 +134,9 @@ const PeminjamanDetailPage = () => {
                         style={{ height: "150px", objectFit: "cover" }}
                       />
                     ) : (
-                      <p className="text-danger fw-bold">Barang ini belum dikembalikan</p>
+                      getStatusText() === "Telat Dikembalikan" || getStatusText() === "Belum Dikembalikan" ? (
+                        <p className="text-danger fw-bold">{getStatusText()}</p>
+                      ) : null
                     )}
                   </div>
                 </div>
@@ -100,28 +144,15 @@ const PeminjamanDetailPage = () => {
                 <table className="w-100 mt-5">
                   <tbody>
                     {[
-
-                      [
-                        "Tanggal Peminjaman",
-                        barang.tanggal_peminjaman
-                          ? moment(barang.tanggal_peminjaman).format("DD MMMM YYYY HH:mm")
-                          : "-",
-                      ],
-                      [
-                        "Tanggal Pengembalian",
-                        barang.tanggal_pengembalian
-                          ? moment(barang.tanggal_pengembalian).format("DD MMMM YYYY HH:mm")
-                          : "-",
-                      ],
-                      // ["Waktu Peminjaman", barang.waktu_peminjaman || barang?.waktu || "-"],
+                      ["Tanggal Peminjaman", barang.tanggal_peminjaman ? moment(barang.tanggal_peminjaman).format("DD MMMM YYYY HH:mm") : "-"],
+                      ["Tanggal Pengembalian", barang.tanggal_pengembalian ? moment(barang.tanggal_pengembalian).format("DD MMMM YYYY HH:mm") : "-"],
                       ["Kode Barang", barang.kode_barang || "-"],
                       ["Nama Barang", barang.nama_barang || "-"],
                       ["Jenis Peminjaman", barang.nama_kategori || "-"],
                       ["Merk", barang.merk || "-"],
                       ["Spesifikasi", barang.deskripsi || barang?.spesifikasi || "-"],
                       ["Sanksi", barang.sanksi || "-"],
-                      ["Status", barang.status === "dikembalikan" ? "Sudah Dikembalikan" : "Belum Dikembalikan"],
-
+                      ["Status", getStatusBadge()],
                     ].map(([label, value], i) => (
                       <tr key={i}>
                         <td className="text-secondary py-1">{label}</td>
@@ -134,23 +165,14 @@ const PeminjamanDetailPage = () => {
               </div>
 
               <div className="d-flex justify-content-center mt-5">
-                {barang.foto_pengembalian ? (
-                  <button
-                    className="btn btn-secondary rounded-pill me-5"
-                    style={{ width: "250px", height: "50px" }}
-                    disabled
-                  >
-                    Sudah Dikembalikan
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => setShowPengembalian(true)}
-                    className="btn btn-primary rounded-pill me-5"
-                    style={{ width: "250px", height: "50px" }}
-                  >
-                    Kembalikan
-                  </button>
-                )}
+                <button
+                  onClick={() => setShowPengembalian(true)}
+                  className="btn btn-primary rounded-pill me-5"
+                  style={{ width: "250px", height: "50px" }}
+                  disabled={isKembaliDisabled()}
+                >
+                  Kembalikan
+                </button>
                 <button
                   onClick={() => router.back()}
                   className="btn btn-outline-secondary rounded-pill shadow-outline-secondary-ss"

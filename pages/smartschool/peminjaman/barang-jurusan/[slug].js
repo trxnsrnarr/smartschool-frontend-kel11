@@ -21,36 +21,35 @@ const BarangJurusan = () => {
   const [loading, setLoading] = useState(true);
   const [jurusanInfo, setJurusanInfo] = useState({ nama: "Jurusan" });
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
-      if (!token) return toast.error("Harap login terlebih dahulu");
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const token = localStorage.getItem("ss-token")?.replaceAll('"', "");
+        if (!token) return toast.error("Harap login terlebih dahulu");
 
-      const res = await clientAxios.get(`/peminjaman/jurusan/${slug}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        const res = await clientAxios.get(`/peminjaman/jurusan/${slug}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      if (res.data && Array.isArray(res.data.data)) {
-        setPeminjaman(res.data.data);
-        const uniqueNames = [...new Set(res.data.data.map((item) => item.nama_barang))];
-        setNamaOptions(["Semua", ...uniqueNames]);
-        filterData(res.data.data, search, selectedNama);
-        setJurusanInfo({ nama: res.data.jurusan }); // <- SET nama jurusan di sini
-      } else {
-        toast.error("Format data tidak valid");
+        if (res.data && Array.isArray(res.data.data)) {
+          setPeminjaman(res.data.data);
+          const uniqueNames = [...new Set(res.data.data.map((item) => item.nama_barang))];
+          setNamaOptions(["Semua", ...uniqueNames]);
+          filterData(res.data.data, search, selectedNama);
+          setJurusanInfo({ nama: res.data.jurusan });
+        } else {
+          toast.error("Format data tidak valid");
+        }
+      } catch (err) {
+        console.error("Gagal ambil data peminjaman:", err);
+        toast.error(err.response?.data?.message || "Gagal mengambil data");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("Gagal ambil data peminjaman:", err);
-      toast.error(err.response?.data?.message || "Gagal mengambil data");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  if (slug) fetchData();
-}, [slug]);
-
+    if (slug) fetchData();
+  }, [slug]);
 
   useEffect(() => {
     filterData(peminjaman, search, selectedNama);
@@ -69,6 +68,14 @@ useEffect(() => {
 
   const handleLihatDetail = (id) => {
     router.push(`/smartschool/peminjaman/barang-jurusan/${slug}/${id}`);
+  };
+
+  const isTelat = (item) => {
+    if (item.status === "dipinjam" && item.batas_pengembalian) {
+      const batas = moment(item.batas_pengembalian);
+      return moment().isAfter(batas);
+    }
+    return false;
   };
 
   if (loading) {
@@ -192,7 +199,7 @@ useEffect(() => {
                             <td>{item.nama_peminjam || "-"}</td>
                             <td>
                               <span
-                                className="badge rounded-pill px-3 py-2 fw-semibold"
+                                className="badge rounded-pill px-3 py-2 fw-semibold me-2"
                                 style={{
                                   backgroundColor: item.status === "dipinjam" ? "#C2140B" : "#4EB701",
                                   color: "white",
@@ -201,6 +208,18 @@ useEffect(() => {
                               >
                                 {item.status === "dipinjam" ? "Belum Dikembalikan" : "Sudah Dikembalikan"}
                               </span>
+                              {isTelat(item) && (
+                                <span
+                                  className="badge rounded-pill px-3 py-2 fw-semibold"
+                                  style={{
+                                    backgroundColor: "#FFC107",
+                                    color: "#3A3A3A",
+                                    fontSize: "0.75rem",
+                                  }}
+                                >
+                                  Telat Dikembalikan
+                                </span>
+                              )}
                             </td>
                             <td>
                               <button

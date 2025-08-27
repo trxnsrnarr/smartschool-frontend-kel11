@@ -20,18 +20,36 @@ const DetailPeminjamanPage = () => {
         const res = await clientAxios.get(`/peminjaman/detail/${id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
-        // Format data sesuai kebutuhan tampilan
+
+        const isTelat =
+          res.data.status === "dipinjam" &&
+          res.data.tanggal_pengembalian &&
+          new Date(res.data.tanggal_pengembalian) < new Date();
+
+        const statusDisplay = res.data.status === "dikembalikan"
+          ? "Sudah Dikembalikan"
+          : isTelat
+          ? "Telat Dikembalikan"
+          : "Belum Dikembalikan";
+
+        const statusColor = res.data.status === "dikembalikan"
+          ? "#4EB701"
+          : isTelat
+          ? "#FF4D4F"
+          : "#C2140B";
+
         const formattedData = {
           ...res.data,
           tanggalPeminjaman: moment(res.data.tanggal_peminjaman).format('DD/MM/YYYY'),
-          tanggalPengembalian: res.data.tanggal_pengembalian 
-            ? moment(res.data.tanggal_pengembalian).format('DD/MM/YYYY') 
+          tanggalPengembalian: res.data.tanggal_pengembalian
+            ? moment(res.data.tanggal_pengembalian).format('DD/MM/YYYY')
             : "-",
           nama: res.data.nama_barang,
-          nama_peminjam: res.data.nama_siswa || res.data.nama_user // Gunakan nama_user jika nama_siswa kosong
+          nama_peminjam: res.data.nama_siswa || res.data.nama_user,
+          statusDisplay,
+          statusColor
         };
-        
+
         setDataDetail(formattedData);
       } catch (err) {
         console.error("Gagal mengambil detail:", err);
@@ -103,9 +121,11 @@ const DetailPeminjamanPage = () => {
                     <tr><td>Nama Barang</td><td>:</td><td className="fw-bold" style={{ color: "#3A4166" }}>{dataDetail.nama}</td></tr>
                     <tr><td>Merk</td><td>:</td><td className="fw-bold" style={{ color: "#3A4166" }}>{dataDetail.merk || "-"}</td></tr>
                     <tr><td>Spesifikasi</td><td>:</td><td className="fw-bold" style={{ color: "#3A4166" }}>{dataDetail.spesifikasi || "-"}</td></tr>
-                    <tr><td>Status</td><td>:</td><td className="fw-bold" style={{ color: dataDetail.status === 'dipinjam' ? '#C2140B' : '#4EB701' }}>
-                      {dataDetail.status === 'dipinjam' ? 'Belum Dikembalikan' : 'Sudah Dikembalikan'}
-                    </td></tr>
+                    <tr><td>Status</td><td>:</td>
+                      <td className="fw-bold" style={{ color: dataDetail.statusColor }}>
+                        {dataDetail.statusDisplay}
+                      </td>
+                    </tr>
                     <tr><td>Sanksi</td><td>:</td><td className="fw-bold" style={{ color: "#3A4166" }}>{dataDetail.sanksi || "-"}</td></tr>
                     <tr><td>Kode Barang</td><td>:</td><td className="fw-bold" style={{ color: "#3A4166" }}>{dataDetail.kode_barang}</td></tr>
                   </tbody>
@@ -116,7 +136,7 @@ const DetailPeminjamanPage = () => {
                 <button
                   onClick={() => router.back()}
                   className="btn btn-primary bg-gradient-primary px-4 py-2 fw-bold"
-                  style={{ 
+                  style={{
                     borderRadius: "18px",
                     width: "150px",
                     height: "50px"
