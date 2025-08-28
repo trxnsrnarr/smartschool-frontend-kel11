@@ -21,6 +21,26 @@ const DetailPeminjamanPage = () => {
           headers: { Authorization: `Bearer ${token}` }
         });
 
+        // LOGIKA YANG SAMA PERSIS DENGAN LIST PAGE
+        const now = new Date();
+        let statusDisplay = "Belum Dikembalikan";
+        let statusColor = "#C2140B"; // Merah default
+        
+        if (res.data.status === "dikembalikan") {
+          statusDisplay = "Sudah Dikembalikan";
+          statusColor = "#4EB701"; // Hijau
+        } else if (res.data.status === "telat") {
+          statusDisplay = "Telat Dikembalikan !";
+          statusColor = "#C2140B"; // Oranye
+        } else if (res.data.batas_pengembalian) {
+          // CEK JIKA SUDAH MELEWATI BATAS PENGEMBALIAN
+          const batasPengembalian = new Date(res.data.batas_pengembalian);
+          if (batasPengembalian < now) {
+            statusDisplay = "Telat Dikembalikan !";
+            statusColor = "#C2140B"; // Oranye
+          }
+        }
+
         // Format data
         const formattedData = {
           ...res.data,
@@ -28,9 +48,16 @@ const DetailPeminjamanPage = () => {
           tanggalPengembalian: res.data.tanggal_pengembalian 
             ? moment(res.data.tanggal_pengembalian).format('DD/MM/YYYY') 
             : "-",
+          batasPengembalian: res.data.batas_pengembalian
+            ? moment(res.data.batas_pengembalian).format('DD/MM/YYYY HH:mm')
+            : "-",
           nama: res.data.nama_barang,
-          nama_peminjam: res.data.nama_siswa || res.data.nama_user || "-", // fallback
+          nama_peminjam: res.data.nama_siswa || res.data.nama_user || "-",
+          statusDisplay,
+          statusColor
         };
+
+        console.log("DEBUG DATA:", formattedData); // UNTUK LIHAT DATA YANG DITERIMA
 
         setDataDetail(formattedData);
       } catch (err) {
@@ -99,13 +126,16 @@ const DetailPeminjamanPage = () => {
                     <tr><td>Jurusan</td><td>:</td><td className="fw-bold">{dataDetail.jurusan || "-"}</td></tr>
                     <tr><td>Tanggal Peminjaman</td><td>:</td><td className="fw-bold">{dataDetail.tanggalPeminjaman}</td></tr>
                     <tr><td>Tanggal Pengembalian</td><td>:</td><td className="fw-bold">{dataDetail.tanggalPengembalian}</td></tr>
+                    <tr><td>Batas Pengembalian</td><td>:</td><td className="fw-bold">{dataDetail.batasPengembalian}</td></tr>
                     <tr><td>Nama Peminjam</td><td>:</td><td className="fw-bold">{dataDetail.nama_peminjam}</td></tr>
                     <tr><td>Nama Barang</td><td>:</td><td className="fw-bold">{dataDetail.nama}</td></tr>
                     <tr><td>Merk</td><td>:</td><td className="fw-bold">{dataDetail.merk || "-"}</td></tr>
                     <tr><td>Spesifikasi</td><td>:</td><td className="fw-bold">{dataDetail.spesifikasi || "-"}</td></tr>
-                    <tr><td>Status</td><td>:</td><td className="fw-bold" style={{ color: dataDetail.status === 'dipinjam' ? '#C2140B' : '#4EB701' }}>
-                      {dataDetail.status === 'dipinjam' ? 'Belum Dikembalikan' : 'Sudah Dikembalikan'}
-                    </td></tr>
+                    <tr><td>Status</td><td>:</td>
+                      <td className="fw-bold" style={{ color: dataDetail.statusColor }}>
+                        {dataDetail.statusDisplay}
+                      </td>
+                    </tr>
                     <tr><td>Sanksi</td><td>:</td><td className="fw-bold">{dataDetail.sanksi || "-"}</td></tr>
                     <tr><td>Kode Barang</td><td>:</td><td className="fw-bold">{dataDetail.kode_barang}</td></tr>
                   </tbody>

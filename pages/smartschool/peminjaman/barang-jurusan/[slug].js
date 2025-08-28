@@ -36,14 +36,18 @@ const BarangJurusan = () => {
 
           const mappedData = res.data.data.map((item, index) => {
             let statusText = "Belum Dikembalikan";
+            
+            // LOGIKA STATUS YANG DIPERBAIKI
             if (item.status === "dikembalikan") {
               statusText = "Sudah Dikembalikan";
-            } else if (
-              item.status === "telat" &&
-              item.batas_pengembalian &&
-              new Date(item.batas_pengembalian) < now
-            ) {
+            } else if (item.status === "telat") {
               statusText = "Telat Dikembalikan !";
+            } else if (item.batas_pengembalian) {
+              // CEK JIKA SUDAH MELEWATI BATAS PENGEMBALIAN
+              const batasPengembalian = new Date(item.batas_pengembalian);
+              if (batasPengembalian < now && item.status !== "dikembalikan") {
+                statusText = "Telat Dikembalikan !";
+              }
             }
 
             return {
@@ -59,8 +63,12 @@ const BarangJurusan = () => {
               namaBarang: item.nama_barang,
               peminjam: item.nama_peminjam || "-",
               status: statusText,
+              batasPengembalian: item.batas_pengembalian, // Untuk debug
+              statusAsli: item.status // Untuk debug
             };
           });
+
+          console.log("Data peminjaman:", mappedData); // Debug log
 
           setDataPeminjaman(mappedData);
           const uniqueNames = [...new Set(mappedData.map((item) => item.namaBarang))];
@@ -81,6 +89,26 @@ const BarangJurusan = () => {
     if (slug) fetchData();
   }, [slug]);
 
+  // TAMBAHKAN FUNGSI UNTUK CEK STATUS REAL-TIME SETIAP MENIT
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = new Date();
+      const updatedData = dataPeminjaman.map(item => {
+        // Hanya update jika status bukan "Sudah Dikembalikan"
+        if (item.status !== "Sudah Dikembalikan" && item.batasPengembalian) {
+          const batasPengembalian = new Date(item.batasPengembalian);
+          if (batasPengembalian < now) {
+            return { ...item, status: "Telat Dikembalikan !" };
+          }
+        }
+        return item;
+      });
+      setDataPeminjaman(updatedData);
+    }, 60000); // Cek setiap 1 menit
+
+    return () => clearInterval(interval);
+  }, [dataPeminjaman]);
+
   useEffect(() => {
     filterData(dataPeminjaman, search, selectedNama);
   }, [search, selectedNama, dataPeminjaman]);
@@ -100,6 +128,12 @@ const BarangJurusan = () => {
     if (status === "Sudah Dikembalikan") {
       return (
         <span className="badge rounded-pill px-3 py-2 fw-semibold" style={{ backgroundColor: "#4EB701", color: "white" }}>
+          {status}
+        </span>
+      );
+    } else if (status === "Telat Dikembalikan !") {
+      return (
+        <span className="badge rounded-pill px-3 py-2 fw-semibold" style={{ backgroundColor: "#C2140B", color: "white" }}>
           {status}
         </span>
       );
